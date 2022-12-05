@@ -1,0 +1,12 @@
+{
+
+    "type": "module",
+
+    "dependencies": {
+
+        "jsdom": "^20.0.3"
+
+    }
+
+}
+
