@@ -11,11 +11,7 @@ export function getCourses(wantedCourses = null) {
   x = Array.prototype.slice.call(x);
 
   if (x[0].querySelectorAll("td").length < 4) x.shift();
-
   const courses = {};
-  let daytimes = x[0].querySelector(
-    "td:nth-child(7)>a>input:nth-child(2)"
-  ).value;
 
   x.forEach((x) => {
     const courseCode = x.querySelector("td").textContent;

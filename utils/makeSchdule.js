@@ -9,7 +9,12 @@ const cartesian = (...a) =>
 
 // checkPossibilties(csc, 5);
 
-export function checkPossibilties(coursesList, coursesCount) {
+export function checkPossibilties(
+  coursesList,
+  coursesCount,
+  allowLocked = true,
+  alreadyOcupied = null
+) {
   let wantedCourses;
   const filt = generateGrayarr(coursesList.length).filter(
     (x) => x.split("1").length - 1 === coursesCount
@@ -21,7 +26,7 @@ export function checkPossibilties(coursesList, coursesCount) {
       if (filt[i][j] === "1") arr.push(coursesList[j]);
     }
     wantedCourses = arr;
-    const schedules = run(wantedCourses);
+    const schedules = run(wantedCourses, allowLocked, alreadyOcupied);
     if (schedules.length > 0) {
       console.log(schedules[0].coursesTitles);
       console.log("عدد الساعات:" + schedules[0].coursesHours);
@@ -35,14 +40,18 @@ export function checkPossibilties(coursesList, coursesCount) {
 
 // space
 
-export function getSchedules(wantedCourses) {
-  const schedules = run(wantedCourses);
+export function getSchedules(
+  wantedCourses,
+  allowLocked = true,
+  alreadyOcupied = null
+) {
+  const schedules = run(wantedCourses, allowLocked, alreadyOcupied);
 
   schedules.forEach((x) => makeFile(x.selectedCourses, "results"));
+  return schedules;
 }
 
-function run(wantedCourses) {
-  const allowLocked = true;
+function run(wantedCourses, allowLocked = true, alreadyOcupied = null) {
   const all = getCartesian(wantedCourses);
   const schedules = [];
   //for loop for all arrays of all posiblities [[0,0],[0,1]]
@@ -57,7 +66,27 @@ function run(wantedCourses) {
       4: [],
       5: [],
     };
+    // register alreadyOcupied courses
+    if (alreadyOcupied) {
+      for (let course of alreadyOcupied) {
+        const courseObject = courses[course.title].find(
+          (x) => x.classCode === course.classCode
+        );
+        schedule.coursesTitles.push(courseObject.courseTitle);
+        selectedCourses.push(courseObject);
+        schedule["coursesHours"] += Number(courseObject.courseHours);
+
+        for (let k in courseObject.periods) {
+          for (let z of courseObject.periods[k].day) {
+            // if (isConflict(schedule, courseObject.periods[k], z)) continue loop1;
+            schedule[z].push(courseObject);
+          }
+        }
+      }
+    }
+
     //for loop for the possibilty number i [0,0]
+    if (typeof all[i] != "object") all[i] = [all[i]];
     for (let j in all[i]) {
       // this is courseObject of wantedCourse[j] course, and the number all[i][j] course
       let courseObject = courses[wantedCourses[j]][all[i][j]];

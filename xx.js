@@ -970,4 +970,4 @@ export const courses = {
   ],
 };
 
-// console.log(getCourses());
+console.log(getCourses()["106 سلم"].find);
